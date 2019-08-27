@@ -14,6 +14,25 @@ using namespace std;
 int main(int argc, char** argv) {
 	
 	string cmd = "";
+	int sflag = 0;
+	int opt;
+	
+	int socket;
+	
+	while ((opt = getopt (argc, argv, "s:")) != -1) {
+        switch (opt)
+		{
+			/* Procesar el flag s si el usuario lo ingresa */
+			case 's':
+				cout<<"socket a utilizar: "<<optarg<<endl;
+				socket = optarg;
+				sflag = 1;
+				break;
+			default:
+				return EXIT_FAILURE;
+          }	    	
+    }
+	
 	
 	while (cmd != "quit") {
 		cout << ">";

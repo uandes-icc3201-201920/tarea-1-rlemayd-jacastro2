@@ -22,11 +22,14 @@ int main(int argc, char** argv) {
 			/* Procesar el flag s si el usuario lo ingresa */
 			case 's':
 				sflag = 1;
+				cout<<"socket a utilizar: "<<optarg<<endl;
+				socket = optarg;
 				break;
 			default:
 				return EXIT_FAILURE;
           }	    	
     }
+	
 	
 	// Uso elemental del almacenamiento KV:
 	
