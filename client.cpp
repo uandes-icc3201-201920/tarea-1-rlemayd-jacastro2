@@ -7,6 +7,9 @@
 #include <sys/un.h>
 #include "util.h"
 
+#include <arpa/inet.h>
+#define dir_socket = "/tmp/db.tuples.sock.";
+
 using namespace std;
 
 
@@ -16,7 +19,7 @@ int main(int argc, char** argv) {
 	string cmd = "";
 	int sflag = 0;
 	int opt;
-	
+	int sock = 0;
 	int socket;
 	
 	while ((opt = getopt (argc, argv, "s:")) != -1) {
@@ -30,10 +33,17 @@ int main(int argc, char** argv) {
 				break;
 			default:
 				return EXIT_FAILURE;
-          }	    	
-    }
+		  }	    	
+	}
 	
+	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+	{ 
+		printf("\n Socket creation error \n"); 
+		return -1; 
+	} 	
+
 	
+
 	while (cmd != "quit") {
 		cout << ">";
 		cin >> cmd;
