@@ -22,6 +22,8 @@ int main(int argc, char** argv) {
 	int sock = 0;
 	int socket;
 	
+	struct sockaddr_in cliente; //Contiene la direccion del servidor que nos queremos conectar	Tambien aca se puede usar sockaddr_un
+
 	while ((opt = getopt (argc, argv, "s:")) != -1) {
         switch (opt)
 		{
@@ -36,13 +38,6 @@ int main(int argc, char** argv) {
 		  }	    	
 	}
 	
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-	{ 
-		printf("\n Socket creation error \n"); 
-		return -1; 
-	} 	
-
-	
 
 	while (cmd != "quit") {
 		cout << ">";
@@ -50,11 +45,34 @@ int main(int argc, char** argv) {
 
 		if(cmd.compare("connect") == 0)//veo si el comando del usuairo es connect
 		{
-			cout << "ejecutar funcion connect\n";
+			//Creamos el socket
+			if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) //Tambien se puede usar AF_UNIX nose cual es el correcto 
+			{ 
+				printf("\n Error en la creacion del socket. \n"); 
+				return -1; 
+			}
+
+			//Lo conectamos
+			cliente.sin_family = AF_INET; //Contiene un codigo a la ubicacion de la familia
+			if(sflag==1)
+			{
+				cliente.sin_port = htons(socket);//Se conecta al puerto dado
+			}
+			else
+			{
+				cliente.sin_port = htons(dir_socket);//Contiene el numero del puerto		htons-> Converts a port number in host byte order to a port number in network byte order
+			}
+			if (connect(sock, (struct sockaddr *)&cliente, sizeof(sockaddr_in)) < 0) //Lo primero es la descripcion del archivo del socket, lo 2do la direccion donde se quiere conectar
+			{ 
+				printf("\nConnection Failed \n"); 
+				return -1; 
+			}
+			cout << "Conexion exitosa!\n";
 		}
 		else if(cmd.compare("disconnect") == 0)//veo si el comando del usuairo es disconnect
 		{
-			cout << "ejecutar funcion disconnect\n";
+			close(sock);
+			cout << "Socket desconectado!\n";
 		}
 		else if(cmd.compare("list") == 0)//veo si el comando del usuairo es list
 		{
@@ -74,7 +92,7 @@ int main(int argc, char** argv) {
 				else if(cmd[i] == '(') //si encuentro un '(' significa que dentro de temp esta la palabra de la funcion a ejecutar.
 				{
 					i++;//le sumo 1 a i para saltarme el parentesis
-					//procedo a revisar que nobre de funcion esta dentro de temp
+					//procedo a revisar que nombre de funcion esta dentro de temp
 					if(temp.str().compare("insert") == 0)//si la funcion es insert...
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
@@ -83,7 +101,7 @@ int main(int argc, char** argv) {
 						bool un_input = true; //boolean que dira si la funcion tiene un parametro
 						for(; i<=cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
-							if(cmd[i] != ',' && cmd[i] != ')')//si el cracter no es ',' ni ')', lo agrego a temp
+							if(cmd[i] != ',' && cmd[i] != ')')//si el caracter no es ',' ni ')', lo agrego a temp
 							{
 								temp << cmd[i];
 							}
