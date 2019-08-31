@@ -4,11 +4,12 @@
 #include <string>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <netinet/in.h> 
 #include <sys/un.h>
 #include "util.h"
 
 #include <arpa/inet.h>
-#define dir_socket = "/tmp/db.tuples.sock.";
+#define DIR "/tmp/db.tuples.sock"// direccion predeterminada del socket
 
 using namespace std;
 
@@ -16,13 +17,13 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	
-	string cmd = "";
-	int sflag = 0;
+	string cmd = ""; //string de la linea de comandos
+	int sflag = 0;//flag que nos dice si el usuario define un socket distinto al predeterminado
 	int opt;
-	int sock = 0;
-	int socket;
+	int sock = 0;//numero en el cual guardaremos el valor que nos retorne la funcion socket()
+	string sock_dir;//direccion que ingresara el usuario
 	
-	struct sockaddr_in cliente; //Contiene la direccion del servidor que nos queremos conectar	Tambien aca se puede usar sockaddr_un
+	struct sockaddr_un cliente_addr; //Contiene la direccion del servidor que nos queremos conectar
 
 	while ((opt = getopt (argc, argv, "s:")) != -1) {
         switch (opt)
@@ -30,7 +31,7 @@ int main(int argc, char** argv) {
 			/* Procesar el flag s si el usuario lo ingresa */
 			case 's':
 				cout<<"socket a utilizar: "<<optarg<<endl;
-				socket = optarg;
+				sock_dir = optarg;
 				sflag = 1;
 				break;
 			default:
@@ -46,38 +47,48 @@ int main(int argc, char** argv) {
 		if(cmd.compare("connect") == 0)//veo si el comando del usuairo es connect
 		{
 			//Creamos el socket
-			if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) //Tambien se puede usar AF_UNIX nose cual es el correcto 
+			if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) //Tambien se puede usar AF_UNIX nose cual es el correcto 
 			{ 
 				printf("\n Error en la creacion del socket. \n"); 
 				return -1; 
 			}
 
 			//Lo conectamos
-			cliente.sin_family = AF_INET; //Contiene un codigo a la ubicacion de la familia
-			if(sflag==1)
+			cliente_addr.sun_family = AF_UNIX; //Contiene un codigo a la ubicacion de la familia
+			
+			
+			if(sflag == 0)
 			{
-				cliente.sin_port = htons(socket);//Se conecta al puerto dado
+				
+				strcpy(cliente_addr.sun_path, DIR);
 			}
 			else
 			{
-				cliente.sin_port = htons(dir_socket);//Contiene el numero del puerto		htons-> Converts a port number in host byte order to a port number in network byte order
+				strcpy(cliente_addr.sun_path, sock_dir.c_str());//Se conecta al puerto dado
 			}
-			if (connect(sock, (struct sockaddr *)&cliente, sizeof(sockaddr_in)) < 0) //Lo primero es la descripcion del archivo del socket, lo 2do la direccion donde se quiere conectar
+			
+			if (connect(sock, (struct sockaddr *)&cliente_addr, sizeof(cliente_addr)) < 0) 
 			{ 
-				printf("\nConnection Failed \n"); 
+				printf("\nConexion fallida \n"); 
 				return -1; 
 			}
 			cout << "Conexion exitosa!\n";
 		}
+		
+		
 		else if(cmd.compare("disconnect") == 0)//veo si el comando del usuairo es disconnect
 		{
 			close(sock);
 			cout << "Socket desconectado!\n";
 		}
+		
+		
 		else if(cmd.compare("list") == 0)//veo si el comando del usuairo es list
 		{
 			cout << "ejecutar funcion list\n";
 		}
+		
+		
 		//si no es ninguno de los anteriores,significa que el comando es del tipo cmd(a) o cmd(a,b)
 		else
 		{
@@ -118,15 +129,21 @@ int main(int argc, char** argv) {
 							}
 							
 						}
-						//TODO:implementar funcion
-						if(un_input && value != "")
+						
+						if(un_input && value != "")//si solo hay un input, osea solo se manda el value y no la key
 						{
+							string msg = "1;"+value;//se mandara el mensaje "1;value", el 1 significara que la funcion sera insert con solo el value
+							send(sock, msg.c_str(), strlen(msg.c_str()),0);
+							
 							cout << "ejecutar funcion insert con valores:\n";
 							cout << "key = generado por la BD" <<endl;
 							cout << "value = " << value <<endl;
 						}
 						else if(value != "" && key!= 0)
 						{
+							string msg = "2;"+to_string(key)+";"+value;//se mandara el mensaje "2;key;value", el 2 significara que la funcion es insert con key y value
+							send(sock, msg.c_str(), strlen(msg.c_str()),0);
+							
 							cout << "ejecutar funcion insert con valores:\n";
 							cout << "key = " << key <<endl;
 							cout << "value = " << value <<endl;
@@ -150,7 +167,9 @@ int main(int argc, char** argv) {
 							{
 								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
 								
-								//TODO:implementar funcion
+								string msg = "3;"+to_string(key); //se mandara el mensaje "3;key", el 3 significa que sera la funcion get()
+								send(sock, msg.c_str(), strlen(msg.c_str()),0);
+								
 								cout << "ejecutar funcion get con valores:\n";
 								cout << "key = " << key <<endl;
 							}
@@ -175,7 +194,9 @@ int main(int argc, char** argv) {
 							{
 								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
 								
-								//TODO:implementar funcion
+								string msg = "4;"+to_string(key); //se mandara el mensaje "4;key", el 4 significa que sera la funcion peek()
+								send(sock, msg.c_str(), strlen(msg.c_str()),0);
+								
 								cout << "ejecutar funcion peek con valores:\n";
 								cout << "key = " << key <<endl;
 							}
@@ -201,7 +222,9 @@ int main(int argc, char** argv) {
 							{
 								value = temp.str();//guardo temp en value
 								
-								//TODO:implementar funcion
+								string msg = "5;"+to_string(key)+";"+value; //se mandara el mensaje "5;key;value", el 5 significa que sera la funcion update()
+								send(sock, msg.c_str(), strlen(msg.c_str()),0);
+								
 								cout << "ejecutar funcion update con parametros:\n";
 								cout << "key = " << key <<endl;
 								cout << "value = " << value <<endl;
@@ -231,7 +254,9 @@ int main(int argc, char** argv) {
 							{
 								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
 								
-								//TODO:implementar funcion
+								string msg = "6;"+to_string(key); //se mandara el mensaje "6;key", el 6 significa que sera la funcion delete()
+								send(sock, msg.c_str(), strlen(msg.c_str()),0);
+								
 								cout << "ejecutar funcion delete con valores:\n";
 								cout << "key = " << key <<endl;
 							}
