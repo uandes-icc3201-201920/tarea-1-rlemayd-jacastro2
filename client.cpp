@@ -1,7 +1,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <string>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h> 
@@ -23,7 +22,11 @@ int main(int argc, char** argv) {
 	int sock = 0;//numero en el cual guardaremos el valor que nos retorne la funcion socket()
 	string sock_dir;//direccion que ingresara el usuario
 	
+	string buffer;//buffer donde se almacenaran los mensajes que lleguen del servidor
+	int server_fd, new_socket, valread;
+	
 	struct sockaddr_un cliente_addr; //Contiene la direccion del servidor que nos queremos conectar
+	int addrlen = sizeof(cliente_addr);
 
 	while ((opt = getopt (argc, argv, "s:")) != -1) {
         switch (opt)
@@ -72,12 +75,16 @@ int main(int argc, char** argv) {
 				printf("\nConexion fallida \n"); 
 				return -1; 
 			}
-			cout << "Conexion exitosa!\n";
+			cout << "Conexion exitosa con el servidor!\n";
+			string msg = "conectado";
+			send(sock, msg.c_str(), strlen(msg.c_str()),0);
 		}
 		
 		
 		else if(cmd.compare("disconnect") == 0)//veo si el comando del usuairo es disconnect
 		{
+			string msg = "desconectado";
+			send(sock, msg.c_str(), strlen(msg.c_str()),0);
 			close(sock);
 			cout << "Socket desconectado!\n";
 		}
@@ -85,7 +92,14 @@ int main(int argc, char** argv) {
 		
 		else if(cmd.compare("list") == 0)//veo si el comando del usuairo es list
 		{
-			cout << "ejecutar funcion list\n";
+			cout << "Lista de claves: \n";
+			string msg = "list";
+			send(sock, msg.c_str(), strlen(msg.c_str()),0);
+			
+			char tempbuff[1024] = {0};
+			valread = read(sock, tempbuff, 1024);
+			buffer = tempbuff;
+			cout<<buffer;
 		}
 		
 		
@@ -132,21 +146,30 @@ int main(int argc, char** argv) {
 						
 						if(un_input && value != "")//si solo hay un input, osea solo se manda el value y no la key
 						{
-							string msg = "1;"+value;//se mandara el mensaje "1;value", el 1 significara que la funcion sera insert con solo el value
+							string msg = "";
+							msg = "1;"+value;//se mandara el mensaje "1;value", el 1 significara que la funcion sera insert con solo el value
+							
+							///AQUI ENVIAMOS Y RECIBIMOS EL MENSAJE DEL INSERT(X)///
+							
 							send(sock, msg.c_str(), strlen(msg.c_str()),0);
 							
-							cout << "ejecutar funcion insert con valores:\n";
-							cout << "key = generado por la BD" <<endl;
-							cout << "value = " << value <<endl;
+							
+							char tempbuff[1024] = {0};
+							valread = read(sock, tempbuff, 1024);
+							buffer = tempbuff;
+							cout<<buffer<<endl;
+							
 						}
 						else if(value != "" && key!= 0)
 						{
-							string msg = "2;"+to_string(key)+";"+value;//se mandara el mensaje "2;key;value", el 2 significara que la funcion es insert con key y value
+							///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DEL INSERT(X,Y)///
+							string msg = "";
+							msg = "2;"+to_string(key)+";"+value+")";//se mandara el mensaje "2;key;value", el 2 significara que la funcion es insert con key y value
 							send(sock, msg.c_str(), strlen(msg.c_str()),0);
-							
-							cout << "ejecutar funcion insert con valores:\n";
-							cout << "key = " << key <<endl;
-							cout << "value = " << value <<endl;
+							char tempbuff[1024] = {0};
+							valread = read(sock, tempbuff, 1024);
+							buffer = tempbuff;
+							cout<<buffer<<endl;
 						}
 						else
 						{
@@ -166,12 +189,16 @@ int main(int argc, char** argv) {
 							else if(cmd[i] == ')' && temp.str() != "") //si el caracter es ')'
 							{
 								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+								string msg = "";
+								msg = "3;"+to_string(key); //se mandara el mensaje "3;key", el 3 significa que sera la funcion get()
 								
-								string msg = "3;"+to_string(key); //se mandara el mensaje "3;key", el 3 significa que sera la funcion get()
+								///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DEL GET(KEY)///
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
-								cout << "ejecutar funcion get con valores:\n";
-								cout << "key = " << key <<endl;
+								char tempbuff[1024] = {0};
+								valread = read(sock, tempbuff, 1024);
+								buffer = tempbuff;
+								cout<<buffer<<endl;
 							}
 							else
 							{
@@ -194,11 +221,15 @@ int main(int argc, char** argv) {
 							{
 								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
 								
-								string msg = "4;"+to_string(key); //se mandara el mensaje "4;key", el 4 significa que sera la funcion peek()
+								///AQUI ENVIAMOS Y RECIVIMOS MENSAJE DE LA FUNCION PEEK(KEY)///
+								string msg = "";
+								msg = "4;"+to_string(key); //se mandara el mensaje "4;key", el 4 significa que sera la funcion peek()
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
-								cout << "ejecutar funcion peek con valores:\n";
-								cout << "key = " << key <<endl;
+								char tempbuff[1024] = {0};
+								valread = read(sock, tempbuff, 1024);
+								buffer = tempbuff;
+								cout<<buffer<<endl;
 							}
 							else
 							{
@@ -222,12 +253,15 @@ int main(int argc, char** argv) {
 							{
 								value = temp.str();//guardo temp en value
 								
-								string msg = "5;"+to_string(key)+";"+value; //se mandara el mensaje "5;key;value", el 5 significa que sera la funcion update()
+								///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DE LA FUNCION UPDATE(KEY,VALUE)///
+								string msg = "";
+								msg = "5;"+to_string(key)+";"+value+")"; //se mandara el mensaje "5;key;value", el 5 significa que sera la funcion update()
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
-								cout << "ejecutar funcion update con parametros:\n";
-								cout << "key = " << key <<endl;
-								cout << "value = " << value <<endl;
+								char tempbuff[1024] = {0};
+								valread = read(sock, tempbuff, 1024);
+								buffer = tempbuff;
+								cout<<buffer<<endl;
 							}
 							else if(cmd[i] == ',' && temp.str() != "")//si el caracter es ','
 							{
@@ -254,11 +288,15 @@ int main(int argc, char** argv) {
 							{
 								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
 								
-								string msg = "6;"+to_string(key); //se mandara el mensaje "6;key", el 6 significa que sera la funcion delete()
-								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
-								cout << "ejecutar funcion delete con valores:\n";
-								cout << "key = " << key <<endl;
+								///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DE LA FUNCION DELETE(KEY)///
+								string msg = "";
+								msg = "6;"+to_string(key); //se mandara el mensaje "6;key", el 6 significa que sera la funcion delete()
+								send(sock, msg.c_str(), strlen(msg.c_str()),0);
+								char tempbuff[1024] = {0};
+								valread = read(sock, tempbuff, 1024);
+								buffer = tempbuff;
+								cout<<buffer<<endl;
 							}
 							else
 							{

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <string>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h> 
@@ -29,8 +28,8 @@ int main(int argc, char** argv) {
     struct sockaddr_un server_addr; 
     int addrlen = sizeof(server_addr);
     
-    char buffer[1024] = {0};
-    
+    string buffer;//string donde se guardaran los mensajes recibidos del cliente
+    int DBcount = 74;//contador de la BD
     
 	
 	// Procesar opciones de linea de comando
@@ -84,6 +83,14 @@ int main(int argc, char** argv) {
     }
     
 	cout<<"servidor creado"<<endl;
+	
+	///aqui empieza la comunicaicon inter proceso///
+	
+	
+	while(true)
+	{
+	buffer.clear();
+	cout<<"esperando conexion..."<<endl;
 	if(listen(server_fd, 3)<0)
 		{
 			perror("error de funcion listen");
@@ -95,40 +102,165 @@ int main(int argc, char** argv) {
 			perror("error de accept");
 			exit(EXIT_FAILURE);
 		}
-		
-	while(true)
+	while(strcmp(buffer.c_str(),"desconectado") != 0)
 	{
+		buffer.clear();
+		char tempbuff[1024] = {0};
+		valread = read(new_socket, tempbuff, 1024);
+		buffer = tempbuff;
+		if(strcmp(buffer.c_str(),"conectado") == 0)
+		{
+			cout<<"se ha conectado un cliente"<<endl;
+		}
 		
-		valread = read(new_socket, buffer, 1024);
-		printf("%s\n",buffer);
-		
-		
+		else if(buffer[0]== '1')
+		{
+			cout<<"insert and generate"<<endl;
+			//ejecutar funcion insert con solo el valor
+			stringstream temp;
+			for(int i = 2; i <= buffer.length(); i++)
+			{
+				temp<<buffer[i];
+			}
+			
+			Value val = { temp.str().length(),temp.str() };
+			db.insert(std::pair<unsigned long, Value>(DBcount++, val));//se inserta el value en una key generada
+			string msg = "tupla guardada en key: " + to_string(DBcount-1);
+			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+		}
+		else if(buffer[0]=='2')
+		{
+			cout<<"insert"<<endl;
+			stringstream temp;
+			unsigned long key;
+			string value;
+			//ejecutar funcion insert con key y value
+			for(int i = 2; i <= buffer.length(); i++)
+			{
+				if(buffer[i] != ';' && buffer[i] != ')') temp<<buffer[i];
+				else if(buffer[i]==';')
+				{
+					key = stoul(temp.str(),nullptr,0);
+					temp.str(string());
+				}
+				else if(buffer[i]==')') value = temp.str();
+			}
+			Value val = { value.length(),value };
+			db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
+			string msg = "tupla guardada";
+			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+		}
+		else if(buffer[0]=='3')
+		{
+			cout<<"get"<<endl;	
+			//ejecutar funcion get
+			stringstream temp;
+			for(int i = 2; i <= buffer.length(); i++)
+			{
+				temp<<buffer[i];
+			}
+			if ( db.find(stoul(temp.str())) == db.end() )
+			{
+				string msg = "llave solicitada no existe";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+			else
+			{
+				string msg = db[stoul(temp.str())].data;
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+			
+		}
+		else if(buffer[0]=='4')
+		{
+			cout<<"peek"<<endl;
+			//ejecutar funcion peek
+			stringstream temp;
+			for(int i = 2; i <= buffer.length(); i++)
+			{
+				temp<<buffer[i];
+			}
+			
+			if ( db.find(stoul(temp.str())) == db.end() ) 
+			{
+				string msg = "false";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+			else 
+			{
+				string msg = "true";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+		}
+		else if(buffer[0]=='5')
+		{
+			cout<<"delete"<<endl;
+			//ejecutar funcion update
+			stringstream temp;
+			unsigned long key;
+			string value;
+			for(int i = 2; i <= buffer.length(); i++)
+			{
+				if(buffer[i] != ';' && buffer[i] != ')') temp<<buffer[i];
+				else if(buffer[i]==';')
+				{
+					key = stoul(temp.str(),nullptr,0);
+					temp.str(string());
+				}
+				else if(buffer[i]==')') value = temp.str();
+			}
+			map<unsigned long, Value>::iterator it = db.find(key);
+			if ( it == db.end() ) 
+			{
+				string msg = "la tupla no existe";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+			else  
+			{
+				it->second = {value.length(),value}; 
+				string msg = "tupla actualizada";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+		}
+		else if(buffer[0]=='6')
+		{
+			cout<<"delete"<<endl;
+			//ejecutar funcion delete
+			stringstream temp;
+			for(int i = 2; i <= buffer.length(); i++)
+			{
+				temp<<buffer[i];
+			}
+			cout<<temp.str()<<endl;
+			
+			if (db.find(stoul(temp.str())) == db.end() ) 
+			{
+				string msg = "la tupla no existe";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+			else  
+			{
+				db.erase(stoul(temp.str()));
+				string msg = "tupla borrada";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+		}
+		else if(strcmp(buffer.c_str(),"list")== 0)
+		{
+			//ejecutar funcion list
+			cout<<"list"<<endl;
+			// Imprimir lo que hemos agregado al mapa KV.
+			for(map<unsigned long,Value>::iterator it = db.begin(); it != db.end(); ++it) 
+			{
+				string msg = to_string(it->first)+"\n";
+				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+			}
+			string msg = "fin de la lista\n";
+			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
+		}
 	}
-	
-	
-	
-	
-	
-	// Uso elemental del almacenamiento KV:
-	
-	// Creamos un arreglo de bytes a mano
-	byte data[] = { 0x01, 0x01, 0x01, 0x01, 0x01 };
-
-	// Luego un vector utilizando el arreglo de bytes
-	vector<byte> vdata(data, data + sizeof(data));
-	
-	// Creamos el valor
-	Value val = { 5, vdata };
-	
-	// Insertamos un par clave, valor directamente
-	// en el mapa KV
-	
-	// Nota: Debiera diseñarse una solución más robusta con una interfaz
-	// adecuada para acceder a la estructura.
-	db.insert(std::pair<unsigned long, Value>(1000, val));
-		
-	// Imprimir lo que hemos agregado al mapa KV.
-	cout << db[1000].size << " " << (int) db[1000].data[0] << endl;
+	cout<<"conexion terminada"<<endl;
+	}
 	
 	return 0;
 }
