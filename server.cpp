@@ -157,16 +157,18 @@ int main(int argc, char** argv) {
 			}
 			Value val = { value.length(),value };
 			map<unsigned long, Value>::iterator it = db.find(key);
+			string msg;
 			if ( it == db.end() )
 			{
 				db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
+				msg = "tupla guardada";
 			}
 			else
 			{
-				db.erase(it);
-				db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
+				fprintf(stderr,"holas");
+				msg = "No se va a insertar el valor porque el key ya esta utilizado con otro valor.";
 			}
-			string msg = "tupla guardada";
+			
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 		}
 		else if(buffer[0]=='3')
