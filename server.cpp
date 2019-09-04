@@ -156,7 +156,16 @@ int main(int argc, char** argv) {
 				else if(buffer[i]==')') value = temp.str();
 			}
 			Value val = { value.length(),value };
-			db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
+			map<unsigned long, Value>::iterator it = db.find(key);
+			if ( it == db.end() )
+			{
+				db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
+			}
+			else
+			{
+				db.erase(it);
+				db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
+			}
 			string msg = "tupla guardada";
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 		}
@@ -217,7 +226,7 @@ int main(int argc, char** argv) {
 					key = stoul(temp.str(),nullptr,0);
 					temp.str(string());
 				}
-				else if(buffer[i]==')') value = temp.str();
+				else if(buffer[i]==')')  value = temp.str();
 			}
 			map<unsigned long, Value>::iterator it = db.find(key);
 			if ( it == db.end() ) 
