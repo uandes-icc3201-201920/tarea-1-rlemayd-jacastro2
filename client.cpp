@@ -137,7 +137,14 @@ int main(int argc, char** argv) {
 							}
 							else if(cmd[i] == ',' && temp.str() != "")//si el caracter es ','
 							{
-								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+								try
+								{
+									key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+								}
+								catch(exception& e)
+								{
+									cout<<"ERROR: la key debe ser un valor numerico"<<endl;
+								}
 								temp.str(string());//borro temp
 								un_input = false;//si se ejecuta este if la funcion tiene 2 parametros
 							}
@@ -188,17 +195,26 @@ int main(int argc, char** argv) {
 							}
 							else if(cmd[i] == ')' && temp.str() != "") //si el caracter es ')'
 							{
-								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
-								string msg = "";
-								msg = "3;"+to_string(key); //se mandara el mensaje "3;key", el 3 significa que sera la funcion get()
+								try
+								{
+									key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+									string msg = "";
+									msg = "3;"+to_string(key); //se mandara el mensaje "3;key", el 3 significa que sera la funcion get()
+									
+									///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DEL GET(KEY)///
+									send(sock, msg.c_str(), strlen(msg.c_str()),0);
+									
+									char tempbuff[1024] = {0};
+									read(sock, tempbuff, 1024);
+									buffer = tempbuff;
+									cout<<buffer<<endl;
+								}
+								catch(exception& e)
+								{
+									cout<<"ERROR: la key debe ser un valor numerico"<<endl;
+								}
 								
-								///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DEL GET(KEY)///
-								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
-								char tempbuff[1024] = {0};
-								read(sock, tempbuff, 1024);
-								buffer = tempbuff;
-								cout<<buffer<<endl;
 							}
 							else
 							{
@@ -219,17 +235,25 @@ int main(int argc, char** argv) {
 							}
 							else if(cmd[i] == ')' && temp.str() != "") //si el caracter es ')'
 							{
-								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+								try
+								{
+									key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+									///AQUI ENVIAMOS Y RECIVIMOS MENSAJE DE LA FUNCION PEEK(KEY)///
+									string msg = "";
+									msg = "4;"+to_string(key); //se mandara el mensaje "4;key", el 4 significa que sera la funcion peek()
+									send(sock, msg.c_str(), strlen(msg.c_str()),0);
+									
+									char tempbuff[1024] = {0};
+									read(sock, tempbuff, 1024);
+									buffer = tempbuff;
+									cout<<buffer<<endl;
+								}
+								catch(exception& e)
+								{
+									cout<<"ERROR: la key debe ser un valor numerico"<<endl;
+								}
 								
-								///AQUI ENVIAMOS Y RECIVIMOS MENSAJE DE LA FUNCION PEEK(KEY)///
-								string msg = "";
-								msg = "4;"+to_string(key); //se mandara el mensaje "4;key", el 4 significa que sera la funcion peek()
-								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
-								char tempbuff[1024] = {0};
-								read(sock, tempbuff, 1024);
-								buffer = tempbuff;
-								cout<<buffer<<endl;
 							}
 							else
 							{
@@ -265,7 +289,15 @@ int main(int argc, char** argv) {
 							}
 							else if(cmd[i] == ',' && temp.str() != "")//si el caracter es ','
 							{
-								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+								try
+								{
+									key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+								}
+								catch(exception& e)
+								{
+									cout<<"ERROR: la key debe ser un valor numerico"<<endl;
+									break;
+								}
 								temp.str(string());//borro temp
 							}
 							else
@@ -286,17 +318,22 @@ int main(int argc, char** argv) {
 							}
 							else if(cmd[i] == ')' && temp.str() != "") //si el caracter es ')'
 							{
-								key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
-								
-								
-								///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DE LA FUNCION DELETE(KEY)///
-								string msg = "";
-								msg = "6;"+to_string(key); //se mandara el mensaje "6;key", el 6 significa que sera la funcion delete()
-								send(sock, msg.c_str(), strlen(msg.c_str()),0);
-								char tempbuff[1024] = {0};
-								read(sock, tempbuff, 1024);
-								buffer = tempbuff;
-								cout<<buffer<<endl;
+								try
+								{
+									key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
+									///AQUI ENVIAMOS Y RECIBIMOS MENSAJES DE LA FUNCION DELETE(KEY)///
+									string msg = "";
+									msg = "6;"+to_string(key); //se mandara el mensaje "6;key", el 6 significa que sera la funcion delete()
+									send(sock, msg.c_str(), strlen(msg.c_str()),0);
+									char tempbuff[1024] = {0};
+									read(sock, tempbuff, 1024);
+									buffer = tempbuff;
+									cout<<buffer<<endl;
+								}
+								catch(exception& e)
+								{
+									cout<<"ERROR: la key debe ser un valor numerico"<<endl;
+								}
 							}
 							else
 							{
