@@ -12,4 +12,4 @@ procesos, y no supimos como implementarlo correctamente.
   - Lo mismo ocurrio con `fork`, dado que no fueron necesarios, no lo implementamos.
 
 - Problemas conocidos:
-  - 
+  - El principal problema fue el de implementar, el timer el cual lo hicimos de la manera incorrecta utilizando un while, esperando a que pasen los 10sg y si los superaba despues de conectarse con el proceso, tiramos el error y desconectamos el socket del proceso.
