@@ -102,11 +102,17 @@ int main(int argc, char** argv) {
 			perror("error de accept");
 			exit(EXIT_FAILURE);
 		}
+		
+	int readval;	
 	while(strcmp(buffer.c_str(),"desconectado") != 0)
 	{
 		buffer.clear();
 		char tempbuff[1024] = {0};
-		read(new_socket, tempbuff, 1024);
+		if((readval = read(new_socket, tempbuff, 1024)) == 0)//si el read es igua a 0 la conexion termino por una desconexion abrupta
+		{
+			cout<<"Error de conexion con el cliente."<<endl;
+			break;
+		}
 		buffer = tempbuff;
 		if(strcmp(buffer.c_str(),"conectado") == 0)
 		{

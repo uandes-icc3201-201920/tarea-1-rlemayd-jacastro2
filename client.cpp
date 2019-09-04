@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 	int opt;
 	int sock = 0;//numero en el cual guardaremos el valor que nos retorne la funcion socket()
 	string sock_dir;//direccion que ingresara el usuario
-	
+	bool conectado = false;
 	string buffer;//buffer donde se almacenaran los mensajes que lleguen del servidor
 	
 	struct sockaddr_un cliente_addr; //Contiene la direccion del servidor que nos queremos conectar
@@ -75,20 +75,22 @@ int main(int argc, char** argv) {
 			}
 			cout << "Conexion exitosa con el servidor!\n";
 			string msg = "conectado";
+			conectado = true;
 			send(sock, msg.c_str(), strlen(msg.c_str()),0);
 		}
 		
 		
-		else if(cmd.compare("disconnect") == 0)//veo si el comando del usuairo es disconnect
+		else if(cmd.compare("disconnect") == 0 && conectado)//veo si el comando del usuairo es disconnect
 		{
 			string msg = "desconectado";
 			send(sock, msg.c_str(), strlen(msg.c_str()),0);
 			close(sock);
+			conectado = false;
 			cout << "Socket desconectado!\n";
 		}
 		
 		
-		else if(cmd.compare("list") == 0)//veo si el comando del usuairo es list
+		else if(cmd.compare("list") == 0 && conectado)//veo si el comando del usuairo es list
 		{
 			cout << "Lista de claves: \n";
 			string msg = "list";
@@ -116,7 +118,7 @@ int main(int argc, char** argv) {
 				{
 					i++;//le sumo 1 a i para saltarme el parentesis
 					//procedo a revisar que nombre de funcion esta dentro de temp
-					if(temp.str().compare("insert") == 0)//si la funcion es insert...
+					if(temp.str().compare("insert") == 0 && conectado)//si la funcion es insert...
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key = 0;
@@ -174,7 +176,7 @@ int main(int argc, char** argv) {
 							cout << "comando invalido\n";
 						}
 					}
-					else if(temp.str().compare("get") == 0)
+					else if(temp.str().compare("get") == 0 && conectado)
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key = 0;
@@ -205,7 +207,7 @@ int main(int argc, char** argv) {
 						}
 						
 					}
-					else if(temp.str().compare("peek") == 0)
+					else if(temp.str().compare("peek") == 0 && conectado)
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key;
@@ -236,7 +238,7 @@ int main(int argc, char** argv) {
 						}
 						
 					}
-					else if(temp.str().compare("update") == 0)
+					else if(temp.str().compare("update") == 0 && conectado)
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key;
@@ -272,7 +274,7 @@ int main(int argc, char** argv) {
 							}
 						}
 					}
-					else if(temp.str().compare("delete") == 0)
+					else if(temp.str().compare("delete") == 0 && conectado)
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key = 0;
@@ -307,9 +309,9 @@ int main(int argc, char** argv) {
 						cout << "comando invalido\n";
 					}
 				}
+
 			}
-		}
-		
+		}		
 	}
 
 	return 0;	
