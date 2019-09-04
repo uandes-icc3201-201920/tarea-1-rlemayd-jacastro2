@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h> 
 #include <sys/un.h>
+#include <time.h>
 #include "util.h"
 
 #include <arpa/inet.h>
@@ -29,8 +30,11 @@ int main(int argc, char** argv) {
     int addrlen = sizeof(server_addr);
     
     string buffer;//string donde se guardaran los mensajes recibidos del cliente
-    int DBcount = 74;//contador de la BD
     
+    
+    int DBcount;//contador de la BD
+    srand (time(NULL));
+    DBcount = rand()% 9001 + 1000;
 	
 	// Procesar opciones de linea de comando
     while ((opt = getopt (argc, argv, "s:")) != -1) {
