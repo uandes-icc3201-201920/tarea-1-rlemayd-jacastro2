@@ -23,10 +23,8 @@ int main(int argc, char** argv) {
 	string sock_dir;//direccion que ingresara el usuario
 	
 	string buffer;//buffer donde se almacenaran los mensajes que lleguen del servidor
-	int server_fd, new_socket, valread;
 	
 	struct sockaddr_un cliente_addr; //Contiene la direccion del servidor que nos queremos conectar
-	int addrlen = sizeof(cliente_addr);
 
 	while ((opt = getopt (argc, argv, "s:")) != -1) {
         switch (opt)
@@ -97,7 +95,7 @@ int main(int argc, char** argv) {
 			send(sock, msg.c_str(), strlen(msg.c_str()),0);
 			
 			char tempbuff[1024] = {0};
-			valread = read(sock, tempbuff, 1024);
+			read(sock, tempbuff, 1024);
 			buffer = tempbuff;
 			cout<<buffer;
 		}
@@ -108,7 +106,7 @@ int main(int argc, char** argv) {
 		{
 			//entonces empiezo a recorrer el string cmd letra por letra hasta llegar a un '('
 			stringstream temp;//genero una variable temporal donde ire guardando el string hasta llegar a un '('
-			for(int i = 0; i<=cmd.length();i++)//recorro el string
+			for(int i = 0; i<= (int)cmd.length();i++)//recorro el string
 			{
 				if(cmd[i] != '(')//si el cracter no es '(', lo agrego a temp
 				{
@@ -124,7 +122,7 @@ int main(int argc, char** argv) {
 						unsigned long key = 0;
 						string value = "";
 						bool un_input = true; //boolean que dira si la funcion tiene un parametro
-						for(; i<=cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
+						for(; i<=(int)cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
 							if(cmd[i] != ',' && cmd[i] != ')')//si el caracter no es ',' ni ')', lo agrego a temp
 							{
@@ -155,7 +153,7 @@ int main(int argc, char** argv) {
 							
 							
 							char tempbuff[1024] = {0};
-							valread = read(sock, tempbuff, 1024);
+							read(sock, tempbuff, 1024);
 							buffer = tempbuff;
 							cout<<buffer<<endl;
 							
@@ -167,7 +165,7 @@ int main(int argc, char** argv) {
 							msg = "2;"+to_string(key)+";"+value+")";//se mandara el mensaje "2;key;value", el 2 significara que la funcion es insert con key y value
 							send(sock, msg.c_str(), strlen(msg.c_str()),0);
 							char tempbuff[1024] = {0};
-							valread = read(sock, tempbuff, 1024);
+							read(sock, tempbuff, 1024);
 							buffer = tempbuff;
 							cout<<buffer<<endl;
 						}
@@ -180,7 +178,7 @@ int main(int argc, char** argv) {
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key = 0;
-						for(; i<=cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
+						for(; i<=(int)cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
 							if(cmd[i] != ')')//si el cracter no es ')', lo agrego a temp
 							{
@@ -196,7 +194,7 @@ int main(int argc, char** argv) {
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
 								char tempbuff[1024] = {0};
-								valread = read(sock, tempbuff, 1024);
+								read(sock, tempbuff, 1024);
 								buffer = tempbuff;
 								cout<<buffer<<endl;
 							}
@@ -211,7 +209,7 @@ int main(int argc, char** argv) {
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key;
-						for(; i<=cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
+						for(; i<=(int)cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
 							if(cmd[i] != ')')//si el cracter no es ')', lo agrego a temp
 							{
@@ -227,7 +225,7 @@ int main(int argc, char** argv) {
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
 								char tempbuff[1024] = {0};
-								valread = read(sock, tempbuff, 1024);
+								read(sock, tempbuff, 1024);
 								buffer = tempbuff;
 								cout<<buffer<<endl;
 							}
@@ -243,7 +241,7 @@ int main(int argc, char** argv) {
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key;
 						string value;
-						for(; i<=cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
+						for(; i<=(int)cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
 							if(cmd[i] != ',' && cmd[i] != ')')//si el cracter no es ',' ni ')', lo agrego a temp
 							{
@@ -259,7 +257,7 @@ int main(int argc, char** argv) {
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								
 								char tempbuff[1024] = {0};
-								valread = read(sock, tempbuff, 1024);
+								read(sock, tempbuff, 1024);
 								buffer = tempbuff;
 								cout<<buffer<<endl;
 							}
@@ -278,7 +276,7 @@ int main(int argc, char** argv) {
 					{
 						temp.str(string());//vacio temp para asi poder colocar el primer parametro de la funcion
 						unsigned long key = 0;
-						for(; i<=cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
+						for(; i<=(int)cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
 							if(cmd[i] != ')')//si el cracter no es ')', lo agrego a temp
 							{
@@ -294,7 +292,7 @@ int main(int argc, char** argv) {
 								msg = "6;"+to_string(key); //se mandara el mensaje "6;key", el 6 significa que sera la funcion delete()
 								send(sock, msg.c_str(), strlen(msg.c_str()),0);
 								char tempbuff[1024] = {0};
-								valread = read(sock, tempbuff, 1024);
+								read(sock, tempbuff, 1024);
 								buffer = tempbuff;
 								cout<<buffer<<endl;
 							}

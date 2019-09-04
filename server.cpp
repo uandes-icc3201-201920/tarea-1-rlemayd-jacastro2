@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	//definimos los parametros necesarios para crear el server
 	string sock_dir;//direccion que ingresara el usuario
 	int abc = 1;
-	int server_fd, new_socket, valread; 
+	int server_fd, new_socket; 
     struct sockaddr_un server_addr; 
     int addrlen = sizeof(server_addr);
     
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 	{
 		buffer.clear();
 		char tempbuff[1024] = {0};
-		valread = read(new_socket, tempbuff, 1024);
+		read(new_socket, tempbuff, 1024);
 		buffer = tempbuff;
 		if(strcmp(buffer.c_str(),"conectado") == 0)
 		{
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 			cout<<"insert and generate"<<endl;
 			//ejecutar funcion insert con solo el valor
 			stringstream temp;
-			for(int i = 2; i <= buffer.length(); i++)
+			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
 			}
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 			unsigned long key;
 			string value;
 			//ejecutar funcion insert con key y value
-			for(int i = 2; i <= buffer.length(); i++)
+			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				if(buffer[i] != ';' && buffer[i] != ')') temp<<buffer[i];
 				else if(buffer[i]==';')
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
 			cout<<"get"<<endl;	
 			//ejecutar funcion get
 			stringstream temp;
-			for(int i = 2; i <= buffer.length(); i++)
+			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
 			}
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 			cout<<"peek"<<endl;
 			//ejecutar funcion peek
 			stringstream temp;
-			for(int i = 2; i <= buffer.length(); i++)
+			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
 			}
@@ -194,12 +194,12 @@ int main(int argc, char** argv) {
 		}
 		else if(buffer[0]=='5')
 		{
-			cout<<"delete"<<endl;
+			cout<<"update: ";
 			//ejecutar funcion update
 			stringstream temp;
 			unsigned long key;
 			string value;
-			for(int i = 2; i <= buffer.length(); i++)
+			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				if(buffer[i] != ';' && buffer[i] != ')') temp<<buffer[i];
 				else if(buffer[i]==';')
@@ -213,42 +213,45 @@ int main(int argc, char** argv) {
 			if ( it == db.end() ) 
 			{
 				string msg = "la tupla no existe";
+				cout<<"tupla solicitada inexistente"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else  
 			{
 				it->second = {value.length(),value}; 
 				string msg = "tupla actualizada";
+				cout<<"exito en la operacion"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 		}
 		else if(buffer[0]=='6')
 		{
-			cout<<"delete"<<endl;
+			cout<<"delete: "<<endl;
 			//ejecutar funcion delete
 			stringstream temp;
-			for(int i = 2; i <= buffer.length(); i++)
+			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
 			}
-			cout<<temp.str()<<endl;
 			
 			if (db.find(stoul(temp.str())) == db.end() ) 
 			{
-				string msg = "la tupla no existe";
+				string msg = "la key no existe";
+				cout<<"key solicitada inexistente"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else  
 			{
 				db.erase(stoul(temp.str()));
 				string msg = "tupla borrada";
+				cout<< "exito en la operacion"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 		}
 		else if(strcmp(buffer.c_str(),"list")== 0)
 		{
 			//ejecutar funcion list
-			cout<<"list"<<endl;
+			cout<<" cliente ejecuto funcion: list()"<<endl;
 			// Imprimir lo que hemos agregado al mapa KV.
 			for(map<unsigned long,Value>::iterator it = db.begin(); it != db.end(); ++it) 
 			{
