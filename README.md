@@ -3,8 +3,7 @@
 #### Repositorio base para tarea 1 de Sistemas Operativos y Redes 201920
 
 - **Dificultades encontradas**:
-  - Lo que mas nos complico fue el uso del timer, dado que debiamos interrumpir el intento de conexion de los dos
-procesos, y no supimos como implementarlo correctamente.
+  - Lo que mas nos complico fue el uso del timer, dado que debiamos interrumpir el intento de conexion de los dos procesos, y no supimos como implementarlo.
   - Otra dificultad que tuvimos fue la de entender bien como funcionaban los comandos necesarios para los sockets, dado que esto nunca lo habiamos hecho antes.
 
 - **Funciones no implementadas**:
@@ -13,7 +12,5 @@ procesos, y no supimos como implementarlo correctamente.
   - Al no aparecer que hacer especificamente con el server para que termine de correr, lo dejamos corriendo indefinidamente, y para hacer que termine de correr, se tiene o que cerrar la consola o parar el proceso.
 
 - **Problemas conocidos**:
-  - El principal problema fue el de implementar, el timer el cual lo hicimos de la manera incorrecta utilizando un while, esperando a que pasen los 10sg y si los superaba despues de conectarse con el proceso, tiramos el error y desconectamos el socket del proceso.
-  - Al no conectar el cliente al server y aplicar un comando este se queda en un loop infinito.
+  - El principal problema fue el de implementar el timer, pensamos implementar un timer antes de la conexion y detenerlo despues de la conexion, y si este superaba los 10sg desconectabamos el socket, pero esto no era lo buscado, por lo que no lo implementamos.
   - Si esta conectado un cliente al servidor, y este se cierra de otra forma que no sea con el comando `quit`, el servidor se queda esperando algun comando de este cliente indefinidamente, y no recibe ningun otro cliente.
-  - Si en key se ingresa un valor que no sea un numero, el cliente se cae tirando un `Aborted(core dumped)`.
