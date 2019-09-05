@@ -125,6 +125,7 @@ int main(int argc, char** argv) {
 		
 		else if(buffer[0]== '1')
 		{
+			string msg;
 			cout<<"insert and generate"<<endl;
 			//ejecutar funcion insert con solo el valor
 			stringstream temp;
@@ -134,8 +135,15 @@ int main(int argc, char** argv) {
 			}
 			
 			Value val = { temp.str().length(),temp.str() };
-			db.insert(std::pair<unsigned long, Value>(DBcount++, val));//se inserta el value en una key generada
-			string msg = "tupla guardada en key: " + to_string(DBcount-1);
+			map<unsigned long, Value>::iterator it = db.find(DBcount);
+			while(it != db.end())
+			{
+				DBcount++;
+				it = db.find(DBcount);
+			}
+			db.insert(std::pair<unsigned long, Value>(DBcount++, val));//se inserta el valor en la key solicitada
+			msg =  "tupla guardada en key: " + to_string(DBcount-1);
+			
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 		}
 		else if(buffer[0]=='2')
