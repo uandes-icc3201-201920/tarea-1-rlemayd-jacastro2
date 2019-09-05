@@ -14,4 +14,4 @@
 
 - **Problemas conocidos**:
   - El principal problema fue el de implementar el timer, pensamos implementar un timer antes de la conexion y detenerlo despues de la conexion, y si este superaba los 10sg desconectabamos el socket, pero esto no era lo buscado, por lo que no lo implementamos.
-  - Si esta conectado un cliente al servidor, y este se cierra de otra forma que no sea con el comando `quit`, el servidor se queda esperando algun comando de este cliente indefinidamente, y no recibe ningun otro cliente.
+  - Si esta conectado un cliente al servidor, y este se cierra de otra forma que no sea con el comando `disconnect`, el servidor se queda esperando algun comando de este cliente indefinidamente, y no recibe ningun otro cliente.

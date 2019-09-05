@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 		{
 			/* Procesar el flag s si el usuario lo ingresa */
 			case 's':
-				cout<<"socket a utilizar: "<<optarg<<endl;
+				cout<<"Socket a utilizar: "<<optarg<<endl;
 				sock_dir = optarg;
 				sflag = 1;
 				break;
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
 						}
 						else
 						{
-							cout << "comando invalido\n";
+							cout << "Comando invalido\n";
 						}
 					}
 					else if(temp.str().compare("get") == 0 && conectado)
@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
 							}
 							else
 							{
-								cout << "comando invalido\n";
+								cout << "Comando invalido\n";
 							}
 						}
 						
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
 						unsigned long key;
 						for(; i<=(int)cmd.length();i++)//empiezo a recorrer cmd denuevo pero despues del parentesis
 						{
-							if(cmd[i] != ')')//si el cracter no es ')', lo agrego a temp
+							if(cmd[i] != ')')//si el caracter no es ')', lo agrego a temp
 							{
 								temp << cmd[i];
 							}
@@ -238,7 +238,7 @@ int main(int argc, char** argv) {
 								try
 								{
 									key = stoul(temp.str(),nullptr,0);//convierto a temp en unsigned long
-									///AQUI ENVIAMOS Y RECIVIMOS MENSAJE DE LA FUNCION PEEK(KEY)///
+									///AQUI ENVIAMOS Y RECIBIMOS MENSAJE DE LA FUNCION PEEK(KEY)///
 									string msg = "";
 									msg = "4;"+to_string(key); //se mandara el mensaje "4;key", el 4 significa que sera la funcion peek()
 									send(sock, msg.c_str(), strlen(msg.c_str()),0);
@@ -257,7 +257,7 @@ int main(int argc, char** argv) {
 							}
 							else
 							{
-								cout << "comando invalido\n";
+								cout << "Comando invalido\n";
 							}
 						}
 						
@@ -302,7 +302,7 @@ int main(int argc, char** argv) {
 							}
 							else
 							{
-								cout << "comando invalido\n";
+								cout << "Comando invalido\n";
 							}
 						}
 					}
@@ -337,13 +337,13 @@ int main(int argc, char** argv) {
 							}
 							else
 							{
-								cout << "comando invalido\n";
+								cout << "Comando invalido\n";
 							}
 						}
 					}
 					else
 					{
-						cout << "comando invalido\n";
+						cout << "Comando invalido\n";
 					}
 				}
 

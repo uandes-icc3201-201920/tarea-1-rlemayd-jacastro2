@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 			/* Procesar el flag s si el usuario lo ingresa */
 			case 's':
 				sflag = 1;
-				cout<<"socket a utilizar: "<<optarg<<endl;
+				cout<<"Socket a utilizar: "<<optarg<<endl;
 				sock_dir = optarg;
 				break;
 			default:
@@ -66,14 +66,14 @@ int main(int argc, char** argv) {
     //creamos el descriptor del socket
     if((server_fd = socket(AF_UNIX, SOCK_STREAM,0))==0)
     {
-    	perror("fallo el socket");
+    	perror("Fallo el socket");
     	exit(EXIT_FAILURE);
     }
     
     //conectamos el socket a la direccion
     if(setsockopt(server_fd,SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &abc, sizeof(abc)))
     {
-    	perror("error de setsock");
+    	perror("Error de setsock");
     	exit(EXIT_FAILURE);
     }
     
@@ -82,11 +82,11 @@ int main(int argc, char** argv) {
     
     if(bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr))<0)
     {
-    	perror("error de bindeo");
+    	perror("Error de bindeo");
     	exit(EXIT_FAILURE);
     }
     
-	cout<<"servidor creado"<<endl;
+	cout<<"Servidor creado"<<endl;
 	
 	///aqui empieza la comunicaicon inter proceso///
 	
@@ -94,16 +94,16 @@ int main(int argc, char** argv) {
 	while(true)
 	{
 	buffer.clear();
-	cout<<"esperando conexion..."<<endl;
+	cout<<"Esperando conexion..."<<endl;
 	if(listen(server_fd, 3)<0)
 		{
-			perror("error de funcion listen");
+			perror("Error de funcion listen");
 			exit(EXIT_FAILURE);
 		}
 		
 	if((new_socket = accept(server_fd, (struct sockaddr *)&server_addr,(socklen_t*)&addrlen))<0)
 		{
-			perror("error de accept");
+			perror("Error de accept");
 			exit(EXIT_FAILURE);
 		}
 		
@@ -120,13 +120,13 @@ int main(int argc, char** argv) {
 		buffer = tempbuff;
 		if(strcmp(buffer.c_str(),"conectado") == 0)
 		{
-			cout<<"se ha conectado un cliente"<<endl;
+			cout<<"Se ha conectado un cliente\n"<<endl;
 		}
 		
 		else if(buffer[0]== '1')
 		{
 			string msg;
-			cout<<"insert and generate"<<endl;
+			cout<<"Cliente a solicitado funcion \"insert and generate\""<<endl;
 			//ejecutar funcion insert con solo el valor
 			stringstream temp;
 			for(int i = 2; i <= (int)buffer.length(); i++)
@@ -142,13 +142,13 @@ int main(int argc, char** argv) {
 				it = db.find(DBcount);
 			}
 			db.insert(std::pair<unsigned long, Value>(DBcount++, val));//se inserta el valor en la key solicitada
-			msg =  "tupla guardada en key: " + to_string(DBcount-1);
+			msg =  "Tupla guardada en key: " + to_string(DBcount-1);
 			
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 		}
 		else if(buffer[0]=='2')
 		{
-			cout<<"insert"<<endl;
+			cout<<"Cliente a solicitado funcion \"insert\""<<endl;
 			stringstream temp;
 			unsigned long key;
 			string value;
@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
 			if ( it == db.end() )
 			{
 				db.insert(std::pair<unsigned long, Value>(key, val));//se inserta el valor en la key solicitada
-				msg = "tupla guardada";
+				msg = "Tupla guardada";
 			}
 			else
 			{
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
 		}
 		else if(buffer[0]=='3')
 		{
-			cout<<"get"<<endl;	
+			cout<<"Cliente a solicitado funcion \"get\""<<endl;	
 			//ejecutar funcion get
 			stringstream temp;
 			for(int i = 2; i <= (int)buffer.length(); i++)
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
 			}
 			if ( db.find(stoul(temp.str())) == db.end() )
 			{
-				string msg = "llave solicitada no existe";
+				string msg = "Llave solicitada no existe";
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else
@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
 		}
 		else if(buffer[0]=='4')
 		{
-			cout<<"peek"<<endl;
+			cout<<"Cliente a solicitado funcion \"peek\""<<endl;
 			//ejecutar funcion peek
 			stringstream temp;
 			for(int i = 2; i <= (int)buffer.length(); i++)
@@ -211,18 +211,18 @@ int main(int argc, char** argv) {
 			
 			if ( db.find(stoul(temp.str())) == db.end() ) 
 			{
-				string msg = "false";
+				string msg = "False";
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else 
 			{
-				string msg = "true";
+				string msg = "True";
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 		}
 		else if(buffer[0]=='5')
 		{
-			cout<<"update: ";
+			cout<<"Cliente a solicitado funcion \"update\"\n";
 			//ejecutar funcion update
 			stringstream temp;
 			unsigned long key;
@@ -240,21 +240,21 @@ int main(int argc, char** argv) {
 			map<unsigned long, Value>::iterator it = db.find(key);
 			if ( it == db.end() ) 
 			{
-				string msg = "la tupla no existe";
-				cout<<"tupla solicitada inexistente"<<endl;
+				string msg = "La tupla no existe";
+				cout<<"\tTupla solicitada por el cliente es inexistente"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else  
 			{
 				it->second = {value.length(),value}; 
-				string msg = "tupla actualizada";
-				cout<<"exito en la operacion"<<endl;
+				string msg = "Tupla actualizada";
+				cout<<"\tExito en la operacion"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 		}
 		else if(buffer[0]=='6')
 		{
-			cout<<"delete: "<<endl;
+			cout<<"Cliente a solicitado funcion \"delete\""<<endl;
 			//ejecutar funcion delete
 			stringstream temp;
 			for(int i = 2; i <= (int)buffer.length(); i++)
@@ -264,33 +264,33 @@ int main(int argc, char** argv) {
 			
 			if (db.find(stoul(temp.str())) == db.end() ) 
 			{
-				string msg = "la key no existe";
-				cout<<"key solicitada inexistente"<<endl;
+				string msg = "La key no existe";
+				cout<<"\tKey solicitada por el cliente es inexistente"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else  
 			{
 				db.erase(stoul(temp.str()));
-				string msg = "tupla borrada";
-				cout<< "exito en la operacion"<<endl;
+				string msg = "Tupla borrada";
+				cout<< "\tExito en la operacion"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 		}
 		else if(strcmp(buffer.c_str(),"list")== 0)
 		{
 			//ejecutar funcion list
-			cout<<" cliente ejecuto funcion: list()"<<endl;
+			cout<<"Cliente a solicitado funcion \"list\""<<endl;
 			// Imprimir lo que hemos agregado al mapa KV.
 			for(map<unsigned long,Value>::iterator it = db.begin(); it != db.end(); ++it) 
 			{
 				string msg = to_string(it->first)+"\n";
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			string msg = "fin de la lista\n";
+			string msg = "\tFin de la lista\n";
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 		}
 	}
-	cout<<"conexion terminada"<<endl;
+	cout<<"conexion terminada\n"<<endl;
 	}
 	
 	return 0;
