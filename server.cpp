@@ -165,7 +165,6 @@ int main(int argc, char** argv) {
 			}
 			else
 			{
-				fprintf(stderr,"holas");
 				msg = "No se va a insertar el valor porque el key ya esta utilizado con otro valor.";
 			}
 			
