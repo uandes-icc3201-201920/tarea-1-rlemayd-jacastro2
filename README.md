@@ -4,7 +4,8 @@
 
 - **Dificultades encontradas**:
   - Lo que mas nos complico fue el uso del timer, dado que debiamos interrumpir el intento de conexion de los dos procesos, y no supimos como implementarlo.
-  - Otra dificultad que tuvimos fue la de entender bien como funcionaban los comandos necesarios para los sockets, dado que esto nunca lo habiamos hecho antes.
+  - Entender bien como funcionan los comandos necesarios para los sockets, dado que esto nunca lo habiamos hecho antes.
+  - En el insert, el problema principal fue el de las key, para que no se repitan las key aleatorias, ya que habian varios casos en donde podian toparse, como por ejemplo, si un random key caia en uno ya existente se debia crear un nuevo key hasta que este no ubiese sido utilizado.
 
 - **Funciones no implementadas**:
   - En el enunciado de la tarea aparece que hay que invocar a `malloc`, lo cual lo encontramos innecesario, dado que sin esta invocacion igual podiamos hacer funcionar el programa, por lo que no lo implementamos.
