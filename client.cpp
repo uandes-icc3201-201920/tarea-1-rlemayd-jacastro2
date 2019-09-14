@@ -45,38 +45,45 @@ int main(int argc, char** argv) {
 		cout << ">";
 		cin >> cmd;
 
-		if(cmd.compare("connect") == 0)//veo si el comando del usuairo es connect
+		if(cmd.compare("connect") == 0)//veo si el comando del usuario es connect
 		{
-			//Creamos el socket
-			if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) //Tambien se puede usar AF_UNIX nose cual es el correcto 
-			{ 
-				printf("\n Error en la creacion del socket. \n"); 
-				return -1; 
-			}
-
-			//Lo conectamos
-			cliente_addr.sun_family = AF_UNIX; //Contiene un codigo a la ubicacion de la familia
-			
-			
-			if(sflag == 0)
+			if(conectado == 1)
 			{
-				
-				strcpy(cliente_addr.sun_path, DIR);
+				cout<<"ya estas conectado al servidor"<<endl;
 			}
 			else
 			{
-				strcpy(cliente_addr.sun_path, sock_dir.c_str());//Se conecta al puerto dado
+				//Creamos el socket
+				if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) //Tambien se puede usar AF_UNIX nose cual es el correcto 
+				{ 
+					printf("\n Error en la creacion del socket. \n"); 
+					return -1; 
+				}
+
+				//Lo conectamos
+				cliente_addr.sun_family = AF_UNIX; //Contiene un codigo a la ubicacion de la familia
+				
+				
+				if(sflag == 0)
+				{
+					
+					strcpy(cliente_addr.sun_path, DIR);
+				}
+				else
+				{
+					strcpy(cliente_addr.sun_path, sock_dir.c_str());//Se conecta al puerto dado
+				}
+				
+				if (connect(sock, (struct sockaddr *)&cliente_addr, sizeof(cliente_addr)) < 0) 
+				{ 
+					printf("\nConexion fallida \n"); 
+					return -1; 
+				}
+				cout << "Conexion exitosa con el servidor!\n";
+				string msg = "conectado";
+				conectado = true;
+				send(sock, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			
-			if (connect(sock, (struct sockaddr *)&cliente_addr, sizeof(cliente_addr)) < 0) 
-			{ 
-				printf("\nConexion fallida \n"); 
-				return -1; 
-			}
-			cout << "Conexion exitosa con el servidor!\n";
-			string msg = "conectado";
-			conectado = true;
-			send(sock, msg.c_str(), strlen(msg.c_str()),0);
 		}
 		
 		
