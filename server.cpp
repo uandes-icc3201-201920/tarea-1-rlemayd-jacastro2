@@ -19,11 +19,9 @@ using namespace std;
 KVStore db;
 int DBcount;//contador de la BD
 string buffer;//string donde se guardaran los mensajes recibidos del cliente
-//*********************************************************************************************************
+
 pthread_rwlock_t rwlock;
-//pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 int ret;
-//*********************************************************************************************************
 
 void* server_cliente(void* sock)
 {
@@ -50,10 +48,7 @@ void* server_cliente(void* sock)
 			cout<<"Cliente a solicitado funcion \"insert and generate\""<<endl;
 			//ejecutar funcion insert con solo el valor
 			stringstream temp;
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
 			ret=pthread_rwlock_wrlock(&rwlock); //lock que posibilita 1 cliente entrar a escribir
-			//*********************************************************************************************************
 			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
@@ -70,10 +65,8 @@ void* server_cliente(void* sock)
 			msg =  "Tupla guardada en key: " + to_string(DBcount-1);
 			
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
+
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 		}
 		else if(buffer[0]=='2')
 		{
@@ -82,10 +75,7 @@ void* server_cliente(void* sock)
 			unsigned long key;
 			string value;
 			//ejecutar funcion insert con key y value
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
 			pthread_rwlock_wrlock(&rwlock); //lock que posibilita 1 cliente entrar a escribir
-			//*********************************************************************************************************
 			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				if(buffer[i] != ';' && buffer[i] != ')') temp<<buffer[i];
@@ -110,20 +100,14 @@ void* server_cliente(void* sock)
 			}
 			
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 		}
 		else if(buffer[0]=='3')
 		{
 			cout<<"Cliente a solicitado funcion \"get\""<<endl;	
 			//ejecutar funcion get
 			stringstream temp;
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
-			pthread_rwlock_rdlock(&rwlock);
-			//*********************************************************************************************************
+			pthread_rwlock_rdlock(&rwlock);//lock que posibilita clientes entrar a leer pero no escribir
 			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
@@ -138,10 +122,7 @@ void* server_cliente(void* sock)
 				string msg = db[stoul(temp.str())].data;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 			
 		}
 		else if(buffer[0]=='4')
@@ -149,10 +130,7 @@ void* server_cliente(void* sock)
 			cout<<"Cliente a solicitado funcion \"peek\""<<endl;
 			//ejecutar funcion peek
 			stringstream temp;
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
-			pthread_rwlock_rdlock(&rwlock);
-			//*********************************************************************************************************
+			pthread_rwlock_rdlock(&rwlock);//lock que posibilita clientes entrar a leer pero no escribir
 			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
@@ -168,10 +146,7 @@ void* server_cliente(void* sock)
 				string msg = "True";
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 		}
 		else if(buffer[0]=='5')
 		{
@@ -180,10 +155,7 @@ void* server_cliente(void* sock)
 			stringstream temp;
 			unsigned long key;
 			string value;
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
-			pthread_rwlock_wrlock(&rwlock);
-			//*********************************************************************************************************
+			pthread_rwlock_wrlock(&rwlock);//lock que posibilita 1 cliente entrar a escribir
 			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				if(buffer[i] != ';' && buffer[i] != ')') temp<<buffer[i];
@@ -208,20 +180,14 @@ void* server_cliente(void* sock)
 				cout<<"\tExito en la operacion"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 		}
 		else if(buffer[0]=='6')
 		{
 			cout<<"Cliente a solicitado funcion \"delete\""<<endl;
 			//ejecutar funcion delete
 			stringstream temp;
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
-			pthread_rwlock_wrlock(&rwlock);
-			//*********************************************************************************************************
+			pthread_rwlock_wrlock(&rwlock);//lock que posibilita 1 cliente entrar a escribir
 			for(int i = 2; i <= (int)buffer.length(); i++)
 			{
 				temp<<buffer[i];
@@ -240,20 +206,14 @@ void* server_cliente(void* sock)
 				cout<< "\tExito en la operacion"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 		}
 		else if(strcmp(buffer.c_str(),"list")== 0)
 		{
 			//ejecutar funcion list
 			cout<<"Cliente a solicitado funcion \"list\""<<endl;
 			// Imprimir lo que hemos agregado al mapa KV.
-			//*********************************************************************************************************
-			//pthread_mutex_lock(&lock);
-			pthread_rwlock_rdlock(&rwlock);
-			//*********************************************************************************************************
+			pthread_rwlock_rdlock(&rwlock);//lock que posibilita clientes entrar a leer pero no escribir
 			for(map<unsigned long,Value>::iterator it = db.begin(); it != db.end(); ++it) 
 			{
 				string msg = to_string(it->first)+"\n";
@@ -261,15 +221,10 @@ void* server_cliente(void* sock)
 			}
 			string msg = "\tFin de la lista\n";
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
-			//*********************************************************************************************************
-			//pthread_mutex_unlock(&lock);
 			pthread_rwlock_unlock(&rwlock);
-			//*********************************************************************************************************
 		}
 	}
 	cout<<"se ha desconectado un cliente"<<endl;
-	//ACA FALTA BORRAR EL CLIENT SOCKET*******************************************************************************************************
-	//COMO TAMBIEN EL THREAD DEL CLIENTE******************************************************************************************************
 	return NULL;
 }
 
