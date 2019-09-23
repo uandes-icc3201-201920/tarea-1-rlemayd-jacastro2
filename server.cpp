@@ -33,7 +33,7 @@ void* server_cliente(void* sock)
 		char tempbuff[1024] = {0};
 		if((readval = read(new_socket, tempbuff, 1024)) == 0)//si el read es igual a 0 la conexion termino por una desconexion abrupta
 		{
-			cout<<"Error de conexion con el cliente."<<endl;
+			cout<<"Error de conexion con el cliente"<<endl;
 			break;
 		}
 		buffer = tempbuff;
@@ -317,8 +317,6 @@ int main(int argc, char** argv) {
 			perror("Error de accept");
 			exit(EXIT_FAILURE);
 		}
-		
-		cout<<new_socket<<endl;
 		
 		//aqui ejecutamos la funcion server_cliente como un thread
 		pthread_t s_c;
