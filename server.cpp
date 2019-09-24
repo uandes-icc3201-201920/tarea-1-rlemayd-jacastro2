@@ -33,7 +33,7 @@ void* server_cliente(void* sock)
 		char tempbuff[1024] = {0};
 		if((readval = read(new_socket, tempbuff, 1024)) == 0)//si el read es igual a 0 la conexion termino por una desconexion abrupta
 		{
-			cout<<"Error de conexion con el cliente"<<endl;
+			cout<<"Error de conexion con el cliente "<<new_socket-3<<endl;
 			break;
 		}
 		buffer = tempbuff;
@@ -45,7 +45,7 @@ void* server_cliente(void* sock)
 		else if(buffer[0]== '1')
 		{
 			string msg;
-			cout<<"Cliente a solicitado funcion \"insert and generate\""<<endl;
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"insert and generate\""<<endl;
 			//ejecutar funcion insert con solo el valor
 			stringstream temp;
 			ret=pthread_rwlock_wrlock(&rwlock); //lock que posibilita 1 cliente entrar a escribir
@@ -70,7 +70,7 @@ void* server_cliente(void* sock)
 		}
 		else if(buffer[0]=='2')
 		{
-			cout<<"Cliente a solicitado funcion \"insert\""<<endl;
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"insert\""<<endl;
 			stringstream temp;
 			unsigned long key;
 			string value;
@@ -97,6 +97,7 @@ void* server_cliente(void* sock)
 			else
 			{
 				msg = "No se va a insertar el valor porque el key ya esta utilizado con otro valor.";
+				cout<<"\tError en la operacion: key ya existente"<<endl;
 			}
 			
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
@@ -104,7 +105,7 @@ void* server_cliente(void* sock)
 		}
 		else if(buffer[0]=='3')
 		{
-			cout<<"Cliente a solicitado funcion \"get\""<<endl;	
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"get\""<<endl;	
 			//ejecutar funcion get
 			stringstream temp;
 			pthread_rwlock_rdlock(&rwlock);//lock que posibilita clientes entrar a leer pero no escribir
@@ -127,7 +128,7 @@ void* server_cliente(void* sock)
 		}
 		else if(buffer[0]=='4')
 		{
-			cout<<"Cliente a solicitado funcion \"peek\""<<endl;
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"peek\""<<endl;
 			//ejecutar funcion peek
 			stringstream temp;
 			pthread_rwlock_rdlock(&rwlock);//lock que posibilita clientes entrar a leer pero no escribir
@@ -150,7 +151,7 @@ void* server_cliente(void* sock)
 		}
 		else if(buffer[0]=='5')
 		{
-			cout<<"Cliente a solicitado funcion \"update\"\n";
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"update\"\n";
 			//ejecutar funcion update
 			stringstream temp;
 			unsigned long key;
@@ -184,7 +185,7 @@ void* server_cliente(void* sock)
 		}
 		else if(buffer[0]=='6')
 		{
-			cout<<"Cliente a solicitado funcion \"delete\""<<endl;
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"delete\""<<endl;
 			//ejecutar funcion delete
 			stringstream temp;
 			pthread_rwlock_wrlock(&rwlock);//lock que posibilita 1 cliente entrar a escribir
@@ -196,7 +197,7 @@ void* server_cliente(void* sock)
 			if (db.find(stoul(temp.str())) == db.end() ) 
 			{
 				string msg = "La key no existe";
-				cout<<"\tKey solicitada por el cliente es inexistente"<<endl;
+				cout<<"\tKey solicitada por el cliente "<<new_socket-3<<" es inexistente"<<endl;
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
 			else  
@@ -211,7 +212,7 @@ void* server_cliente(void* sock)
 		else if(strcmp(buffer.c_str(),"list")== 0)
 		{
 			//ejecutar funcion list
-			cout<<"Cliente a solicitado funcion \"list\""<<endl;
+			cout<<"Cliente "<<new_socket-3<<" a solicitado funcion \"list\""<<endl;
 			// Imprimir lo que hemos agregado al mapa KV.
 			pthread_rwlock_rdlock(&rwlock);//lock que posibilita clientes entrar a leer pero no escribir
 			for(map<unsigned long,Value>::iterator it = db.begin(); it != db.end(); ++it) 
@@ -219,12 +220,12 @@ void* server_cliente(void* sock)
 				string msg = to_string(it->first)+"\n";
 				send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			}
-			string msg = "\tFin de la lista\n";
+			string msg = "*Fin de la lista*\n";
 			send(new_socket, msg.c_str(), strlen(msg.c_str()),0);
 			pthread_rwlock_unlock(&rwlock);
 		}
 	}
-	cout<<"se ha desconectado un cliente"<<endl;
+	cout<<"se ha desconectado el cliente "<<new_socket-3<<endl;
 	return NULL;
 }
 
